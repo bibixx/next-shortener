@@ -1,43 +1,53 @@
-import React, { useEffect, useState } from 'react'
-import type { GetServerSideProps } from 'next'
+import React, { useEffect, useState } from 'react';
+import type { GetServerSideProps } from 'next';
 import copy from 'copy-to-clipboard';
-import { Form, Button, Col, Container, Row, Toast, ToastContainer, Navbar } from 'react-bootstrap'
-import { basicAuthCheck } from 'utils/basicAuthCheck'
-import { makeRequest } from 'utils/makeRequest'
-import { isValidSlug } from 'utils/validators/createUrl.utils'
-import { CreateUrlResponseDTO } from './api/url'
+import {
+  Form,
+  Button,
+  Col,
+  Container,
+  Row,
+  Toast,
+  ToastContainer,
+  Navbar,
+} from 'react-bootstrap';
+import { basicAuthCheck } from 'utils/basicAuthCheck';
+import { makeRequest } from 'utils/makeRequest';
+import { isValidSlug } from 'utils/validators/createUrl.utils';
+import { CreateUrlResponseDTO } from './api/url';
 import { GOOGLE_SHEET_ID } from 'constants/env';
 
-const defaultFormValues = { url: '', customSlug: '' }
+const defaultFormValues = { url: '', customSlug: '' };
 
-const getUrl = (origin: string, slug: string) => `${origin}/${slug}`
+const getUrl = (origin: string, slug: string) => `${origin}/${slug}`;
 
 interface Props {
-  sheetId: string
+  sheetId: string;
 }
 
 const Admin = ({ sheetId }: Props) => {
-  const [{ url, customSlug }, setFormData] = useState(defaultFormValues)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string>()
-  const [origin, setOrigin] = useState('')
-  const [createdSlug, setCreatedSlug] = useState('')
+  const [{ url, customSlug }, setFormData] = useState(defaultFormValues);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const [origin, setOrigin] = useState('');
+  const [createdSlug, setCreatedSlug] = useState('');
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+    setOrigin(window.location.origin);
+  }, []);
 
-  const onChange = (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(undefined)
-    setFormData(formData => ({
-      ...formData,
-      [name]: e.target.value,
-    }))
-  }
+  const onChange =
+    (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setError(undefined);
+      setFormData((formData) => ({
+        ...formData,
+        [name]: e.target.value,
+      }));
+    };
 
-  const isSlugValid = customSlug === '' || isValidSlug(customSlug)
-  const googleSheetsLink = `https://docs.google.com/spreadsheets/d/${sheetId}`
+  const isSlugValid = customSlug === '' || isValidSlug(customSlug);
+  const googleSheetsLink = `https://docs.google.com/spreadsheets/d/${sheetId}`;
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,25 +56,29 @@ const Admin = ({ sheetId }: Props) => {
       return;
     }
 
-    setError(undefined)
-    setIsLoading(true)
+    setError(undefined);
+    setIsLoading(true);
 
     try {
-      const response = await makeRequest<CreateUrlResponseDTO>('/api/url', 'POST', {
-        URL: url.trim(),
-        SLUG: customSlug
-      })
-      setIsLoading(false)
+      const response = await makeRequest<CreateUrlResponseDTO>(
+        '/api/url',
+        'POST',
+        {
+          URL: url.trim(),
+          SLUG: customSlug,
+        },
+      );
+      setIsLoading(false);
 
-      setShowToast(true)
-      setCreatedSlug(response.SLUG)
-      setFormData(defaultFormValues)
-      copy(getUrl(origin, response.SLUG))
+      setShowToast(true);
+      setCreatedSlug(response.SLUG);
+      setFormData(defaultFormValues);
+      copy(getUrl(origin, response.SLUG));
     } catch (error: any) {
-      setError(error.message)
-      setIsLoading(false)
+      setError(error.message);
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -82,17 +96,25 @@ const Admin = ({ sheetId }: Props) => {
       </Navbar>
       <Container className="pt-3">
         <ToastContainer className="p-3" position="top-center">
-          <Toast onClose={() => setShowToast(false)} show={showToast} delay={5000} autohide bg="success">
+          <Toast
+            onClose={() => setShowToast(false)}
+            show={showToast}
+            delay={5000}
+            autohide
+            bg="success"
+          >
             <Toast.Header>
               <strong className="me-auto">An link created successfully!</strong>
             </Toast.Header>
             <Toast.Body className="text-white">
               <div>
-                It&apos;s available at <a href={getUrl(origin, createdSlug)} className="text-white">{getUrl(origin, createdSlug)}</a>.
+                It&apos;s available at{' '}
+                <a href={getUrl(origin, createdSlug)} className="text-white">
+                  {getUrl(origin, createdSlug)}
+                </a>
+                .
               </div>
-              <div>
-                It was copied to clipboard.
-              </div>
+              <div>It was copied to clipboard.</div>
             </Toast.Body>
           </Toast>
         </ToastContainer>
@@ -122,7 +144,9 @@ const Admin = ({ sheetId }: Props) => {
                   isInvalid={!isSlugValid}
                 />
                 <Form.Control.Feedback type="invalid">
-                  You can only use <span className="font-monospace">a-z A-Z 0-9 - . _</span> in the slug
+                  You can only use{' '}
+                  <span className="font-monospace">a-z A-Z 0-9 - . _</span> in
+                  the slug
                 </Form.Control.Feedback>
                 <Form.Text className="text-muted">
                   Enter a custom slug that will be used in the link.
@@ -133,9 +157,7 @@ const Admin = ({ sheetId }: Props) => {
                   )}
                 </Form.Text>
               </Form.Group>
-              {error && <div className="text-danger mb-3">
-                {error}
-              </div>}
+              {error && <div className="text-danger mb-3">{error}</div>}
               <Button variant="primary" type="submit" disabled={isLoading}>
                 {isLoading ? 'Loading...' : 'Add New Link'}
               </Button>
@@ -144,17 +166,17 @@ const Admin = ({ sheetId }: Props) => {
         </Row>
       </Container>
     </>
-  )
-}
+  );
+};
 
-export default Admin
+export default Admin;
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-  await basicAuthCheck(ctx.req, ctx.res)
+  await basicAuthCheck(ctx.req, ctx.res);
 
   return {
     props: {
-      sheetId: GOOGLE_SHEET_ID
-    }
-  }
-}
+      sheetId: GOOGLE_SHEET_ID,
+    },
+  };
+};

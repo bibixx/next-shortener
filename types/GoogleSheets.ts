@@ -1,7 +1,7 @@
-import { GoogleSpreadsheetRow } from "google-spreadsheet";
+import { GoogleSpreadsheetRow } from 'google-spreadsheet';
 
 export interface URLRow extends GoogleSpreadsheetRow {
-  URL: string
-  SLUG: string
-  ACTIVE: 'TRUE' | 'FALSE' | ''
+  URL: string;
+  SLUG: string;
+  ACTIVE: 'TRUE' | 'FALSE' | '';
 }
