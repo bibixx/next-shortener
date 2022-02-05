@@ -6,12 +6,17 @@ import { basicAuthCheck } from 'utils/basicAuthCheck'
 import { makeRequest } from 'utils/makeRequest'
 import { isValidSlug } from 'utils/validators/createUrl.utils'
 import { CreateUrlResponseDTO } from './api/url'
+import { GOOGLE_SHEET_ID } from 'constants/env';
 
 const defaultFormValues = { url: '', customSlug: '' }
 
 const getUrl = (origin: string, slug: string) => `${origin}/${slug}`
 
-const Admin = () => {
+interface Props {
+  sheetId: string
+}
+
+const Admin = ({ sheetId }: Props) => {
   const [{ url, customSlug }, setFormData] = useState(defaultFormValues)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
@@ -32,6 +37,7 @@ const Admin = () => {
   }
 
   const isSlugValid = customSlug === '' || isValidSlug(customSlug)
+  const googleSheetsLink = `https://docs.google.com/spreadsheets/d/${sheetId}`
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,6 +71,13 @@ const Admin = () => {
       <Navbar bg="dark" variant="dark">
         <Container>
           <Navbar.Brand>Link Shortener Admin</Navbar.Brand>
+          <Navbar.Text
+            as="a"
+            target="_blank"
+            href={`https://docs.google.com/spreadsheets/d/${sheetId}`}
+          >
+            Google Sheets
+          </Navbar.Text>
         </Container>
       </Navbar>
       <Container className="pt-3">
@@ -136,10 +149,12 @@ const Admin = () => {
 
 export default Admin
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   await basicAuthCheck(ctx.req, ctx.res)
 
   return {
-    props: {}
+    props: {
+      sheetId: GOOGLE_SHEET_ID
+    }
   }
 }
