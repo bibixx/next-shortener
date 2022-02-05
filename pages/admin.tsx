@@ -85,11 +85,7 @@ const Admin = ({ sheetId }: Props) => {
       <Navbar bg="dark" variant="dark">
         <Container>
           <Navbar.Brand>Link Shortener Admin</Navbar.Brand>
-          <Navbar.Text
-            as="a"
-            target="_blank"
-            href={`https://docs.google.com/spreadsheets/d/${sheetId}`}
-          >
+          <Navbar.Text as="a" target="_blank" href={googleSheetsLink}>
             Google Sheets
           </Navbar.Text>
         </Container>
